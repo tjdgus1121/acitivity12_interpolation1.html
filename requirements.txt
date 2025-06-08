@@ -20,4 +20,7 @@ flask==2.0.1
 flask-cors==3.0.10
 
 # 서버
-gunicorn==20.1.0 
+gunicorn==20.1.0
+
+# basicsr 설치
+git+https://github.com/XPixelGroup/BasicSR.git 
