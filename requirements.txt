@@ -3,7 +3,7 @@ setuptools>=65.5.1
 wheel>=0.38.4
 
 # 기본 의존성
-numpy==1.21.6
+numpy>=1.24.0
 scipy>=1.7.0
 pillow==9.0.0
 
@@ -23,4 +23,4 @@ flask-cors==3.0.10
 gunicorn==20.1.0
 
 # basicsr 설치
-git+https://github.com/XPixelGroup/BasicSR.git 
+git+https://github.com/XPixelGroup/BasicSR.git
