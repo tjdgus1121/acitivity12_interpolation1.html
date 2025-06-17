@@ -25,6 +25,7 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
         }
 
@@ -44,6 +45,31 @@
         .header p {
             color: #666;
             font-size: 1.1rem;
+        }
+
+        .server-status-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .server-status-section p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .upload-section {
@@ -117,21 +143,6 @@
             display: none;
             text-align: center;
             padding: 20px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         .comparison-container {
@@ -292,6 +303,229 @@
                 gap: 5px;
             }
         }
+
+        .preview-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .image-preview-container {
+            flex: 1;
+            min-width: 280px;
+            max-width: 50%;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .image-details {
+            flex: 1;
+            min-width: 280px;
+            max-width: 45%;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .image-details h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .image-details p {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .image-details p strong {
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .preview-section {
+                flex-direction: column;
+            }
+            .image-preview-container, .image-details {
+                max-width: 100%;
+            }
+        }
+
+        .help-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #007bff, #0056b3); /* Blue gradient */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            position: fixed; /* Added this again for safety */
+        }
+
+        .help-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .help-btn .help-text {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .help-btn:hover .help-text {
+            opacity: 1;
+        }
+
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1001; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            backdrop-filter: blur(5px); /* Blurred background */
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .modal--active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto; /* Centered */
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%; /* Could be more responsive */
+            max-width: 700px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            animation: animatezoom 0.6s;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        @keyframes animatezoom {
+            from {transform: scale(0);}
+            to {transform: scale(1);}
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 38px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .modal-body p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .modal-body strong {
+            color: #333;
+        }
+
+        .modal-body ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .help-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+                bottom: 20px;
+                right: 20px;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            .modal-content h2 {
+                font-size: 1.5rem;
+            }
+            .modal-body p, .modal-body li {
+                font-size: 0.95rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -301,6 +535,11 @@
             <p>RealESRGAN으로 이미지를 4배 고해상도로 업스케일하세요</p>
         </div>
 
+        <div class="server-status-section" id="serverStatusSection">
+            <p id="serverStatusText">서버 로딩 중... 잠시 기다려 주세요.</p>
+            <div class="spinner"></div>
+        </div>
+
         <div class="upload-section">
             <div class="upload-area" onclick="document.getElementById('fileInput').click()">
                 <div class="upload-icon">📸</div>
@@ -308,6 +547,18 @@
                 <div class="upload-hint">JPG, PNG, WebP 지원 (최대 10MB)</div>
             </div>
             <input type="file" id="fileInput" accept="image/*" />
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="image-preview-container">
+                <img id="imagePreview" src="#" alt="Image Preview" />
+            </div>
+            <div class="image-details">
+                <h3>이미지 정보</h3>
+                <p><strong>파일명:</strong> <span id="fileName"></span></p>
+                <p><strong>해상도:</strong> <span id="fileResolution"></span></p>
+                <p><strong>파일 크기:</strong> <span id="fileSize"></span></p>
+            </div>
         </div>
 
         <div style="text-align: center;">
@@ -377,6 +628,47 @@
         let upscaledImageUrl = null;
         let isSliding = false;
 
+        const upscaleBtn = document.getElementById('upscaleBtn');
+        const uploadSection = document.querySelector('.upload-section');
+        const serverStatusSection = document.getElementById('serverStatusSection');
+        const serverStatusText = document.getElementById('serverStatusText');
+
+        // 초기 상태 설정: 업로드 및 업스케일 버튼 비활성화
+        upscaleBtn.disabled = true;
+        uploadSection.style.pointerEvents = 'none'; // 클릭 방지
+        uploadSection.style.opacity = '0.5'; // 비활성화된 느낌
+
+        // 서버 상태 확인 함수
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+
+                if (response.ok && data.status === 'healthy' && data.model_loaded) {
+                    serverStatusText.textContent = '서버 준비 완료!';
+                    serverStatusSection.style.display = 'none';
+                    uploadSection.style.pointerEvents = 'auto';
+                    uploadSection.style.opacity = '1';
+                    // 파일이 선택되어 있다면 버튼 활성화
+                    if (originalFile) {
+                        upscaleBtn.disabled = false;
+                    }
+                    console.log('Server is healthy and model is loaded.');
+                } else {
+                    serverStatusText.textContent = '모델 로딩 중... 잠시 기다려 주세요.';
+                    setTimeout(checkServerStatus, 5000); // 5초 후 다시 확인
+                    console.log('Server or model not ready yet. Retrying...');
+                }
+            } catch (error) {
+                serverStatusText.textContent = '서버 연결 중... ';
+                setTimeout(checkServerStatus, 5000); // 5초 후 다시 확인
+                console.error('Failed to fetch server health:', error);
+            }
+        }
+
+        // 페이지 로드 시 서버 상태 확인 시작
+        window.addEventListener('load', checkServerStatus);
+
         // 파일 선택 이벤트
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -387,6 +679,32 @@
                 // 파일 정보 표시
                 const uploadText = document.querySelector('.upload-text');
                 uploadText.textContent = `선택된 파일: ${file.name}`;
+
+                const previewSection = document.getElementById('previewSection');
+                const imagePreview = document.getElementById('imagePreview');
+                const fileNameSpan = document.getElementById('fileName');
+                const fileResolutionSpan = document.getElementById('fileResolution');
+                const fileSizeSpan = document.getElementById('fileSize');
+
+                // 미리보기 표시
+                previewSection.style.display = 'flex';
+                imagePreview.src = URL.createObjectURL(file);
+
+                // 파일 정보 업데이트
+                fileNameSpan.textContent = file.name;
+                fileSizeSpan.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+                const img = new Image();
+                img.onload = function() {
+                    fileResolutionSpan.textContent = `${img.width} × ${img.height} 픽셀`;
+                };
+                img.src = imagePreview.src;
+
+            } else {
+                // 파일 선택이 취소되었을 때 미리보기 섹션 숨기기
+                document.getElementById('previewSection').style.display = 'none';
+                document.getElementById('upscaleBtn').disabled = true;
+                document.querySelector('.upload-text').textContent = '이미지를 업로드하세요';
             }
         });
 
@@ -399,12 +717,13 @@
             
             btn.disabled = true;
             loading.style.display = 'block';
+            document.getElementById('previewSection').style.display = 'none'; // 업스케일 시작 시 미리보기 숨김
 
             const formData = new FormData();
             formData.append('image', originalFile);
 
             try {
-                const response = await fetch('/upscale', {
+                const response = await fetch('https://acitivity12-interpolation1-html.onrender.com/upscale', {
                     method: 'POST',
                     body: formData
                 });
@@ -533,9 +852,27 @@
             }
         }
 
-        // 드래그 앤 드롭 지원
-        const uploadSection = document.querySelector('.upload-section');
+        // 도움말 모달 관련 JavaScript
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeButton = helpModal.querySelector('.close-button');
 
+        helpBtn.addEventListener('click', () => {
+            helpModal.classList.add('modal--active');
+        });
+
+        closeButton.addEventListener('click', () => {
+            helpModal.classList.remove('modal--active');
+        });
+
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', (event) => {
+            if (event.target == helpModal) {
+                helpModal.classList.remove('modal--active');
+            }
+        });
+
+        // 드래그 앤 드롭 지원
         uploadSection.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadSection.style.borderColor = '#667eea';
@@ -563,5 +900,28 @@
             }
         });
     </script>
+
+    <button class="help-btn" id="helpBtn">?
+        <span class="help-text">도움말</span>
+    </button>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>AI Image Upscaler 활용 가이드</h2>
+            <div class="modal-body">
+                <p>환영합니다! 이 웹사이트는 AI 기반의 RealESRGAN 모델을 사용하여 이미지를 4배 고해상도로 업스케일해주는 도구입니다.</p>
+                <p><strong>사용 방법:</strong></p>
+                <ol>
+                    <li><strong>이미지 업로드:</strong> '이미지를 업로드하세요' 영역을 클릭하거나 이미지를 드래그 앤 드롭하여 업로드합니다. JPG, PNG, WebP 형식이 지원되며 최대 10MB까지 가능합니다.</li>
+                    <li><strong>이미지 정보 확인:</strong> 이미지를 업로드하면 미리보기와 함께 파일명, 해상도, 파일 크기 등 기본 정보가 표시됩니다.</li>
+                    <li><strong>업스케일 시작:</strong> '업스케일 시작' 버튼을 클릭하여 AI 업스케일링을 시작합니다. 서버 로딩 상태를 확인한 후 진행해 주세요.</li>
+                    <li><strong>결과 확인:</strong> 업스케일링이 완료되면, 원본 이미지와 업스케일된 이미지를 비교 뷰에서 확인할 수 있습니다. 슬라이더를 움직여 변화를 자세히 살펴보세요. '원본' 탭과 '업스케일' 탭으로 개별 이미지를 볼 수도 있습니다.</li>
+                    <li><strong>이미지 다운로드:</strong> 업스케일된 이미지 뷰에서 '다운로드' 버튼을 클릭하여 고해상도 이미지를 저장할 수 있습니다.</li>
+                </ol>
+                <p>궁금한 점이 있다면 언제든지 문의해 주세요!</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
