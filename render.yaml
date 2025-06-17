@@ -1,5 +1,16 @@
 services:
   - type: web
-    name: your-service-name
-    env: docker  # ✅ 반드시 docker로 설정해야 Dockerfile 인식됨
+    name: ai-image-upscaler
+    env: python
+    buildCommand: "pip install -r requirements.txt && python download_models.py"
+    startCommand: "gunicorn app:app"
     plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: PORT
+        value: 10000
+    disk:
+      name: ai-upscaler-disk
+      mountPath: /opt/render/project/src/weights
+      sizeGB: 1
