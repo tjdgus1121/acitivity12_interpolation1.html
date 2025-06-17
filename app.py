@@ -15,6 +15,13 @@ CORS(app)
 # 전역 변수로 모델 인스턴스 저장
 upsampler = None
 
+# 보간법 매핑 (프론트엔드 처리로 인해 더 이상 사용되지 않음)
+# INTERPOLATION_METHODS = {
+#     'nearest': cv2.INTER_NEAREST,
+#     'bilinear': cv2.INTER_LINEAR,
+#     'bicubic': cv2.INTER_CUBIC,
+# }
+
 def initialize_model():
     """모델 초기화"""
     global upsampler
@@ -50,8 +57,8 @@ def initialize_model():
             # 백업 방법: 간단한 바이큐빅 업샘플링
             upsampler = None
 
-def simple_upscale(image, scale=4):
-    """간단한 바이큐빅 업샘플링 (백업용)"""
+def simple_upscale_fallback(image, scale=4):
+    """RealESRGAN 로드 실패 또는 처리 오류 시의 바이큐빅 업샘플링 (백업용)"""
     height, width = image.shape[:2]
     new_height, new_width = height * scale, width * scale
     return cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
@@ -64,7 +71,7 @@ def index():
 
 @app.route('/upscale', methods=['POST'])
 def upscale_image():
-    """이미지 업스케일링 API"""
+    """이미지 업스케일링 API (RealESRGAN 전용)"""
     try:
         # 파일 확인
         if 'image' not in request.files:
@@ -81,25 +88,26 @@ def upscale_image():
         # PIL Image를 OpenCV 형식으로 변환
         image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
         
+        output = None # 결과 이미지 초기화
+
         # 모델 초기화 (처음 요청 시에만)
         if upsampler is None:
             initialize_model()
         
-        # 업스케일링 수행
+        # RealESRGAN 업스케일링 수행
         if upsampler is not None:
             try:
-                # RealESRGAN으로 업스케일링
                 output, _ = upsampler.enhance(image_cv, outscale=4)
                 print("RealESRGAN으로 업스케일링 완료")
             except Exception as e:
                 print(f"RealESRGAN 처리 오류: {str(e)}")
-                # 백업: 바이큐빅 업샘플링
-                output = simple_upscale(image_cv, 4)
-                print("바이큐빅 업샘플링으로 처리 완료")
+                # RealESRGAN 실패 시 백업: 바이큐빅 업샘플링
+                output = simple_upscale_fallback(image_cv, 4)
+                print("RealESRGAN 실패로 바이큐빅 업샘플링으로 처리 완료")
         else:
-            # 백업: 바이큐빅 업샘플링
-            output = simple_upscale(image_cv, 4)
-            print("바이큐빅 업샘플링으로 처리 완료")
+            # upsampler가 로드되지 않았을 경우 백업: 바이큐빅 업샘플링
+            output = simple_upscale_fallback(image_cv, 4)
+            print("RealESRGAN 모델 미로드로 바이큐빅 업샘플링으로 처리 완료")
         
         # 결과를 PIL Image로 변환
         output_rgb = cv2.cvtColor(output, cv2.COLOR_BGR2RGB)
