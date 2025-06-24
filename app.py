@@ -11,7 +11,7 @@ from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "https://tjdgus1121.github.io"}})
 
 # 업로드 설정
 UPLOAD_FOLDER = 'uploads'
