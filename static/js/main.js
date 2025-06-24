@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 서버 상태 및 RealESRGAN 모델 로드 상태 확인
     const checkServerStatus = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:5000/health'); // 로컬 서버로 변경
+            const response = await fetch('https://acitivity12-interpolation1-html.onrender.com/health');
             const data = await response.json();
             serverReady = data.server_status === 'ready';
             modelReady = data.model_status === 'ready';
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('image', originalFile);
                 formData.append('scale', scaleFactor);
 
-                const response = await fetch('http://127.0.0.1:5000/upscale', {
+                const response = await fetch('https://acitivity12-interpolation1-html.onrender.com/upscale', {
                     method: 'POST',
                     body: formData,
                 });
