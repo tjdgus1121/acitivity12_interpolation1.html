@@ -572,6 +572,16 @@
             transform: translateY(-3px) scale(1.05);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -650,7 +660,7 @@
         </section>
 
         <div style="text-align: center; margin-bottom: 40px;">
-            <button class="btn" id="upscaleBtn" disabled onclick="startUpscale()">
+            <button class="btn" id="upscaleBtn" disabled>
                 <span id="loading" class="spinner" style="display: none; margin: 0; width: 20px; height: 20px; border-width: 3px;"></span>
                 업스케일 시작
             </button>
@@ -679,7 +689,7 @@
     <!-- Help Modal -->
     <div id="helpModal" class="modal">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
+            <span class="close-button" id="closeHelpPopupBtn">&times;</span>
             <h2>AI Image Upscaler 활용 가이드</h2>
             <div class="modal-body">
                 <p>환영합니다! 이 웹사이트는 AI 기반의 RealESRGAN 모델을 사용하여 이미지를 4배 고해상도로 업스케일해주는 도구입니다.</p>
@@ -700,8 +710,12 @@
     <div id="progressModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="hideProgressModal()">&times;</span>
-            <div class="spinner"></div>
+            <div id="progressSpinner" class="spinner"></div>
             <h2 id="progressTitle"></h2>
+            <div id="progressMessage" style="margin-bottom: 10px; font-size: 1.1rem; color: #444;"></div>
+            <div style="width: 100%; background: #eee; border-radius: 8px; height: 16px; margin: 15px 0;">
+                <div id="progressBar" style="height: 100%; width: 0; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 8px; transition: width 0.3s;"></div>
+            </div>
             <p id="progressStatusText"></p>
         </div>
     </div>
