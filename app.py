@@ -23,13 +23,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # 모델 설정
 MODEL_PATH = os.path.join('weights', 'realesr-general-x4v3.pth')
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# RRDBNet 기반 ESRGAN 모델 로드
-rrdb_net = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64,
-                   num_block=23, num_grow_ch=32, scale=4)
+
+# ------------------- 수정된 부분 -------------------
 upscaler_esrgan = RealESRGANer(
     scale=4,
     model_path=MODEL_PATH,
-    model=rrdb_net,
+    model=None,      # None으로 두면 내부에서 .pth에 맞춘 아키텍처를 생성
     tile=0,
     tile_pad=10,
     pre_pad=0,
