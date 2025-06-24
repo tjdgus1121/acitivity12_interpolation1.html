@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Upscaler</title>
+    <title>Image Upscale App</title>
     <style>
         * {
             margin: 0;
@@ -15,56 +15,124 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
             border-radius: 20px;
-            padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-        }
-
-        .header {
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
             text-align: center;
-            margin-bottom: 40px;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            background-clip: text;
         }
 
-        .header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .server-status-section {
-            text-align: center;
+        .upload-section {
             margin-bottom: 40px;
+            padding: 30px;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
         }
 
-        .server-status-section p {
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: translateY(-2px);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            margin-left: 10px;
+        }
+
+        .upload-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .upload-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .file-info {
+            margin-top: 15px;
             color: #666;
-            font-size: 1.1rem;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
         }
 
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #667eea;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -72,656 +140,414 @@
             100% { transform: rotate(360deg); }
         }
 
-        .comparison-section {
-            width: 100%; /* 추가: 섹션이 항상 전체 너비를 차지하도록 */
+        .preview-section {
+            margin-top: 30px;
+            display: none;
         }
 
-        .interpolation-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
-
-        .interpolation-section h2 {
-            font-size: 1.8rem;
+        .preview-section h2 {
             color: #333;
             margin-bottom: 20px;
-            text-align: center;
+            font-size: 1.5em;
+            font-weight: 300;
         }
 
-        .interpolation-options-group {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2열 그리드 */
-            gap: 20px; /* 그리드 항목 간 간격 */
-            margin-top: 20px;
-        }
-
-        .interpolation-option {
-            display: flex;
-            flex-direction: column; /* 항목 내부 요소는 세로 정렬 */
-            align-items: center; /* 가운데 정렬 */
-            justify-content: space-between;
-            padding: 25px; /* Slightly more padding for spacious feel */
-            background: white;
-            border-radius: 20px; /* Slightly more rounded corners */
-            border: 2px solid transparent; /* 기본 테두리 */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer initial shadow */
-            transition: all 0.3s ease; /* Ensure smooth transitions */
-        }
-
-        .interpolation-option:hover {
-            transform: translateY(-7px); /* More pronounced lift on hover */
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
-        }
-
-        /* 선택된 보간법 옵션 스타일 */
-        .interpolation-option:has(input[type="radio"]:checked) {
-            background-color: #e0f7fa; /* 연한 하늘색 배경 */
-            border-color: #667eea; /* 강조 테두리 */
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); /* Stronger shadow on selection */
-        }
-
-        .radio-text-group {
-            display: flex;
-            align-items: center; /* 라디오 버튼과 텍스트 수직 가운데 정렬 */
-            width: 100%; /* 부모 너비만큼 확장 */
-            margin-bottom: 20px; /* More space below radio/label group */
-            justify-content: space-between; /* 라디오 버튼은 왼쪽, 텍스트는 가운데, 스페이서는 오른쪽 */
-        }
-
-        .radio-text-spacer {
-            width: 30px; /* 라디오 버튼의 대략적인 너비 + 마진 */
-            flex-shrink: 0;
-        }
-
-        .interpolation-option label {
-            font-size: 1.6rem; /* Slightly larger font for label */
-            font-weight: 600;
-            color: #333;
-            cursor: pointer;
-            display: flex;
-            flex-grow: 1; /* 남은 공간 채우기 */
-            justify-content: center; /* 라벨 텍스트 가운데 정렬 */
-        }
-
-        .interpolation-option input[type="radio"] {
-            transform: scale(1.5); /* Slightly larger radio button */
-            accent-color: #667eea; /* Highlight color for radio button */
-            flex-shrink: 0; /* 라디오 버튼이 축소되지 않도록 */
-        }
-
-        .btn-small {
-            background: linear-gradient(135deg, #4CAF50, #2E8B57); /* Green gradient */
-            color: white;
-            border: none;
-            padding: 14px 30px; /* Larger button */
-            border-radius: 30px;
-            font-size: 1.2rem; /* Larger font for button */
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            align-self: center; /* 버튼을 가운데 정렬 */
-            margin-top: 20px; /* More space above button */
-        }
-
-        .btn-small:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 7px 15px rgba(46, 139, 87, 0.4);
-        }
-
-        @media (max-width: 768px) {
-            .interpolation-section {
-                padding: 20px;
-            }
-            .interpolation-section h2 {
-                font-size: 1.5rem;
-            }
-            .interpolation-options-group {
-                grid-template-columns: 1fr; /* 작은 화면에서는 1열 그리드 */
-            }
-            .interpolation-option {
-                align-items: flex-start; /* 모바일에서는 다시 왼쪽 정렬 */
-                padding: 15px;
-            }
-            .radio-text-group {
-                justify-content: flex-start; /* 모바일에서는 왼쪽 정렬 */
-            }
-            .radio-text-spacer {
-                display: none; /* 모바일에서는 스페이서 숨김 */
-            }
-            .interpolation-option label {
-                font-size: 1.2rem;
-                justify-content: flex-start; /* 모바일에서는 왼쪽 정렬 */
-            }
-            .interpolation-option input[type="radio"] {
-                transform: scale(1.2);
-            }
-            .btn-small {
-                font-size: 1rem;
-                padding: 10px 20px;
-                align-self: flex-start; /* 모바일에서는 왼쪽 정렬 */
-                margin-top: 10px; /* 모바일 간격 조정 */
-            }
-            .interpolation-status {
-                font-size: 0.9rem; /* 모바일 폰트 크기 조정 */
-                text-align: left; /* 모바일에서는 왼쪽 정렬 */
-            }
-        }
-
-        /* 비활성화 상태 스타일 */
-        .interpolation-option:has(input[type="radio"]:disabled) {
-            background-color: #f0f0f0; /* 비활성화 시 회색 배경 */
-            opacity: 0.8; /* 전체적으로 약간 흐리게 */
-            pointer-events: none; /* 클릭 이벤트 방지 */
-            border-color: transparent; /* 비활성화 시 테두리 제거 */
-        }
-
-        .interpolation-option:has(input[type="radio"]:disabled) .radio-text-group label,
-        .interpolation-option:has(input[type="radio"]:disabled) .radio-text-group input[type="radio"],
-        .interpolation-option:has(input[type="radio"]:disabled) .interpolation-status,
-        .interpolation-option:has(input[type="radio"]:disabled) .btn-small,
-        .interpolation-option:has(input[type="radio"]:disabled) .learn-more-btn {
-            cursor: not-allowed;
-            opacity: 0.6; /* 시각적으로 비활성화된 느낌 */
-        }
-
-        .interpolation-status {
-            font-size: 1.2rem; /* 폰트 크기 증가 */
-            color: #555; /* Slightly darker color for better contrast */
-            margin-left: 0; /* 가운데 정렬을 위해 마진 제거 */
-            margin-top: 15px; /* 라벨과의 간격 증가 */
-            min-width: unset; /* 고정 너비 해제 */
-            text-align: center; /* 텍스트 가운데 정렬 */
-        }
-
-        .upload-section {
-            background: #f8f9fa;
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            height: auto;
             border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 2px dashed #ddd;
-            text-align: center;
-            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            object-fit: contain;
         }
 
-        .upload-section:hover {
-            border-color: #667eea;
-            background: #f0f2ff;
+        .result-section {
+            margin-top: 40px;
+            display: none;
         }
 
-        .upload-area {
-            cursor: pointer;
-            padding: 20px;
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-
-        .upload-text {
-            font-size: 1.2rem;
+        .result-section h2 {
             color: #333;
-            margin-bottom: 10px;
-        }
-
-        .upload-hint {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            font-weight: 300;
         }
 
         .comparison-container {
-            position: relative; /* 자식 요소 절대 위치 지정을 위해 */
-            width: 100%;
-            height: 900px; /* 고정 높이 */
-            overflow: hidden; /* 슬라이더로 숨겨진 부분 가리기 */
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            background-color: #f0f0f0; /* 원래 로딩 중 배경색 */
-            margin-bottom: 20px;
-            user-select: none; /* 드래그 시 텍스트 선택 방지 */
-            -webkit-user-select: none; /* Safari 지원 */
-        }
-
-        .comparison-container canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* 이미지가 캔버스에 맞춰지도록 */
-            transition: clip-path 0.3s ease-out; /* 슬라이더 애니메이션 */
-            pointer-events: none; /* 캔버스가 마우스 이벤트를 가로채지 않도록 */
-        }
-
-        #originalCanvas {
-            z-index: 1; /* 원본 캔버스 뒤에 */
-        }
-
-        #upscaledCanvas {
-            z-index: 2; /* 업스케일 캔버스 앞에 */
-            /* clip-path는 JS에서 동적으로 조절 */
-        }
-
-        .resize-handle {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 4px; /* 원래 너비로 되돌림 */
-            background: white; /* 원래 슬라이더 핸들 색상 */
-            cursor: ew-resize;
-            z-index: 3; /* 가장 앞에 */
-            transform: translateX(-50%); /* 중앙 정렬 */
-            border-radius: 2px;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.5); /* 핸들 주변 그림자 */
-            pointer-events: auto; /* 핸들이 마우스 이벤트를 받도록 */
-        }
-
-        .slider-label {
-            position: absolute;
-            top: 15px; /* 상단 여백 */
-            background-color: rgba(0, 0, 0, 0.6); /* 어두운 배경 */
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            z-index: 4; /* 레이블이 핸들 위에 오도록 */
-            opacity: 0.9;
-        }
-
-        .slider-label.left-label {
-            left: 15px;
-        }
-
-        .slider-label.right-label {
-            right: 15px;
-        }
-
-        /* 기존 이미지 관련 CSS 정리 (canvas로 대체되므로) */
-        .comparison-slider,
-        .comparison-slider img,
-        #beforeImage, #afterImage, #beforeImageSimple, #afterImageSimple {
-            display: none; /* 캔버스 사용으로 인해 기존 이미지 요소 숨김 */
-        }
-
-        .comparison-info {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 1rem;
-            color: #666;
-        }
-
-        .comparison-info p {
-            margin-bottom: 8px;
-        }
-
-        .comparison-info span {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .button-group {
-            text-align: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             margin-top: 20px;
         }
 
-        .btn {
-            background: linear-gradient(135deg, #28a745, #218838);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            margin: 0 10px;
-            transition: all 0.3s ease;
+        .image-container {
+            text-align: center;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        .image-label {
+            font-size: 1.2em;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #555;
         }
 
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #5a6268);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            cursor: pointer;
-            margin: 0 10px;
-            transition: all 0.3s ease;
+        .original-label {
+            color: #667eea;
         }
 
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        .upscaled-label {
+            color: #28a745;
         }
 
-        /* Help Modal Styles */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal--active {
-            display: flex; /* Flexbox to center content */
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 30px;
+        .comparison-image {
+            width: 100%;
+            max-height: 400px;
+            height: auto;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-width: 600px;
-            position: relative;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .close-button {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close-button:hover,
-        .close-button:focus {
-            color: #333;
-            text-decoration: none;
-        }
-
-        .modal-content h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.8rem;
-        }
-
-        .modal-body {
-            line-height: 1.6;
-            color: #555;
-            font-size: 1rem;
-        }
-
-        .modal-body p {
-            margin-bottom: 15px;
-        }
-
-        .modal-body strong {
-            color: #333;
-        }
-
-        .modal-body ol {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-
-        .modal-body li {
-            margin-bottom: 8px;
-        }
-
-        .modal-body ul {
-            list-style-type: disc;
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-
-        /* Progress Modal Styles */
-        #progressModal .modal-content {
-            text-align: center;
-        }
-
-        #progressModal .modal-content h2 {
-            color: #764ba2;
-        }
-
-        #progressModal .modal-content .spinner {
-            margin: 20px auto;
-            width: 50px;
-            height: 50px;
-            border-top-color: #764ba2;
-        }
-
-        #progressModal .modal-content p {
-            font-size: 1.1rem;
-            color: #444;
-        }
-
-        /* Help button styles */
-        .help-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #007bff, #0056b3); /* Blue gradient */
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .help-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        #imagePreview {
-            max-width: 100%;
-            max-height: 400px;
+            transition: transform 0.3s ease;
             object-fit: contain;
-            display: block;
-            margin: 0 auto;
-            background: #f0f0f0;
+            border: 3px solid transparent;
+        }
+
+        .comparison-image:hover {
+            transform: scale(1.02);
+        }
+
+        .original-image {
+            border-color: #667eea;
+        }
+
+        .upscaled-image {
+            border-color: #28a745;
+        }
+
+        .image-info {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .comparison-image {
+                max-height: 300px;
+            }
+        }
+
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
             border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .success-message {
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .file-input-label, .upload-btn {
+                display: block;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1>AI Image Upscaler</h1>
-            <p>RealESRGAN으로 이미지를 4배 고해상도로 업스케일하세요</p>
-        </header>
-
-        <section id="serverStatusSection" class="server-status-section">
-            <div class="spinner"></div>
-            <p id="serverStatusText">서버 연결 중...</p>
-        </section>
-
-        <section class="interpolation-section">
-            <h2>업스케일링 보간법 선택</h2>
-            <div class="interpolation-options-group">
-                <div class="interpolation-option">
-                    <div class="radio-text-group">
-                        <input type="radio" id="nearestOption" name="interpolation" value="nearest" checked>
-                        <label for="nearestOption">최근접 이웃 보간법</label>
-                        <div class="radio-text-spacer"></div>
-                    </div>
-                    
-                    <button class="btn-small learn-more-btn" data-method="nearest">자세히 알아보기</button>
-                </div>
-                <div class="interpolation-option">
-                    <div class="radio-text-group">
-                        <input type="radio" id="bilinearOption" name="interpolation" value="bilinear">
-                        <label for="bilinearOption">선형 보간법</label>
-                        <div class="radio-text-spacer"></div>
-                    </div>
-                    
-                    <button class="btn-small learn-more-btn" data-method="bilinear">자세히 알아보기</button>
-                </div>
-                <div class="interpolation-option">
-                    <div class="radio-text-group">
-                        <input type="radio" id="bicubicOption" name="interpolation" value="bicubic">
-                        <label for="bicubicOption">비큐빅 보간법</label>
-                        <div class="radio-text-spacer"></div>
-                    </div>
-                    
-                    <button class="btn-small learn-more-btn" data-method="bicubic">자세히 알아보기</button>
-                </div>
-                <div class="interpolation-option">
-                    <div class="radio-text-group">
-                        <input type="radio" id="realesrganOption" name="interpolation" value="realesrgan">
-                        <label for="realesrganOption">RealESRGAN (AI 학습)</label>
-                        <div class="radio-text-spacer"></div>
-                    </div>
-                    <span class="interpolation-status" id="realesrganStatus">로딩 중...</span>
-                    <button class="btn-small learn-more-btn" data-method="realesrgan">자세히 알아보기</button>
-                </div>
-            </div>
-        </section>
-
-        <section class="upload-section" id="uploadSection">
-            <input type="file" id="fileInput" accept="image/jpeg, image/png, image/webp">
-            <div class="upload-area" onclick="document.getElementById('fileInput').click();">
-                <div class="upload-icon">⬆️</div>
-                <p class="upload-text">이미지를 업로드하세요</p>
-                <p class="upload-hint">JPG, PNG, WebP 지원 (최대 10MB)</p>
-            </div>
-        </section>
-
-        <section id="previewSection" style="display: none;">
-            <h2>이미지 미리보기</h2>
-            <div class="preview-content">
-                <img id="imagePreview" src="#" alt="Image Preview">
-                <div class="file-info">
-                    <p>파일명: <span id="fileName"></span></p>
-                    <p>해상도: <span id="fileResolution"></span></p>
-                    <p>파일 크기: <span id="fileSize"></span></p>
-                </div>
-            </div>
-        </section>
-
-        <div style="text-align: center; margin-bottom: 40px;">
-            <button class="btn" id="upscaleBtn" disabled>
-                <span id="loading" class="spinner" style="display: none; margin: 0; width: 20px; height: 20px; border-width: 3px;"></span>
-                업스케일 시작
-            </button>
-        </div>
+        <h1>🚀 Image Upscale</h1>
         
-        <section class="comparison-section" id="comparisonSection" style="display: none;">
-            <h2 class="section-title">이미지 비교</h2>
-            <div class="comparison-container" id="comparisonContainer">
-                <canvas id="originalCanvas"></canvas>
-                <canvas id="upscaledCanvas"></canvas>
-                <div class="slider-label left-label">원본</div>
-                <div class="slider-label right-label">업스케일링</div>
-                <div class="resize-handle" id="resizeHandle"></div>
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="imageFile" accept="image/*">
+                <label for="imageFile" class="file-input-label">
+                    📁 이미지 선택
+                </label>
             </div>
-            <div class="comparison-info">
-                <p>원본 해상도: <span id="originalSize"></span></p>
-                <p>업스케일된 해상도: <span id="upscaledSize"></span></p>
-            </div>
-            <div class="button-group">
-                <button id="downloadBtn" class="btn">업스케일된 이미지 다운로드</button>
-                <button id="resetBtn" class="btn btn-secondary">다시 시작</button>
-            </div>
-        </section>
-    </div>
+            <button class="upload-btn" id="uploadBtn" disabled>
+                ⬆️ 업스케일 시작
+            </button>
+            <div class="file-info" id="fileInfo"></div>
+        </div>
 
-    <!-- Help Modal -->
-    <div id="helpModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="closeHelpPopupBtn">&times;</span>
-            <h2>AI Image Upscaler 활용 가이드</h2>
-            <div class="modal-body">
-                <p>환영합니다! 이 웹사이트는 AI 기반의 RealESRGAN 모델을 사용하여 이미지를 4배 고해상도로 업스케일해주는 도구입니다.</p>
-                <p><strong>사용 방법:</strong></p>
-                <ol>
-                    <li><strong>이미지 업로드:</strong> '이미지를 업로드하세요' 영역을 클릭하거나 이미지를 드래그 앤 드롭하여 업로드합니다. JPG, PNG, WebP 형식이 지원되며 최대 10MB까지 가능합니다.</li>
-                    <li><strong>이미지 정보 확인:</strong> 이미지를 업로드하면 미리보기와 함께 파일명, 해상도, 파일 크기 등 기본 정보가 표시됩니다.</li>
-                    <li><strong>업스케일 시작:</strong> '업스케일 시작' 버튼을 클릭하여 AI 업스케일링을 시작합니다. 서버 로딩 상태를 확인한 후 진행해 주세요.</li>
-                    <li><strong>결과 확인:</strong> 업스케일링이 완료되면, 원본 이미지와 업스케일된 이미지를 비교 뷰에서 확인할 수 있습니다. 슬라이더를 움직여 변화를 자세히 살펴보세요. '원본' 탭과 '업스케일' 탭으로 개별 이미지를 볼 수도 있습니다.</li>
-                    <li><strong>이미지 다운로드:</strong> 업스케일된 이미지 뷰에서 '다운로드' 버튼을 클릭하여 고해상도 이미지를 저장할 수 있습니다.</li>
-                </ol>
-                <p>궁금한 점이 있다면 언제든지 문의해 주세요!</p>
+        <div class="preview-section" id="previewSection">
+            <h2>📷 선택된 이미지</h2>
+            <img class="preview-image" id="previewImage" alt="선택된 이미지">
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>이미지를 업스케일하는 중입니다...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="result-section" id="resultSection">
+            <h2>✨ Before & After 비교</h2>
+            <div class="comparison-container">
+                <div class="image-container">
+                    <div class="image-label original-label">🔍 원본</div>
+                    <img class="comparison-image original-image" id="originalImage" alt="원본 이미지">
+                    <div class="image-info" id="originalInfo"></div>
+                </div>
+                <div class="image-container">
+                    <div class="image-label upscaled-label">🚀 업스케일</div>
+                    <img class="comparison-image upscaled-image" id="upscaledImage" alt="업스케일된 이미지">
+                    <div class="image-info" id="upscaledInfo"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Progress Modal -->
-    <div id="progressModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="hideProgressModal()">&times;</span>
-            <div id="progressSpinner" class="spinner"></div>
-            <h2 id="progressTitle"></h2>
-            <div id="progressMessage" style="margin-bottom: 10px; font-size: 1.1rem; color: #444;"></div>
-            <div style="width: 100%; background: #eee; border-radius: 8px; height: 16px; margin: 15px 0;">
-                <div id="progressBar" style="height: 100%; width: 0; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 8px; transition: width 0.3s;"></div>
-            </div>
-            <p id="progressStatusText"></p>
-        </div>
-    </div>
+    <script>
+        const imageFile = document.getElementById('imageFile');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const resultSection = document.getElementById('resultSection');
+        const originalImage = document.getElementById('originalImage');
+        const upscaledImage = document.getElementById('upscaledImage');
+        const originalInfo = document.getElementById('originalInfo');
+        const upscaledInfo = document.getElementById('upscaledInfo');
 
-    <button class="help-btn" id="helpBtn">?</button>
+        const SERVER_URL = 'https://acitivity12-interpolation1-html.onrender.com/upscale';
 
-    <script src="static/js/main.js" defer></script>
+        // 파일 선택 이벤트
+        imageFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileInfo.textContent = `선택된 파일: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`;
+                uploadBtn.disabled = false;
+                hideMessages();
+                showPreview(file);
+            } else {
+                fileInfo.textContent = '';
+                uploadBtn.disabled = true;
+                previewSection.style.display = 'none';
+                resultSection.style.display = 'none';
+            }
+        });
+
+        // 이미지 미리보기 함수
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewSection.style.display = 'block';
+                
+                // 이미지 로드 후 크기 정보 표시
+                previewImage.onload = function() {
+                    const img = new Image();
+                    img.onload = function() {
+                        console.log(`미리보기 이미지 크기: ${img.width} x ${img.height}`);
+                    };
+                    img.src = e.target.result;
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 업로드 버튼 클릭 이벤트
+        uploadBtn.addEventListener('click', function() {
+            const file = imageFile.files[0];
+            if (!file) {
+                showError('파일을 선택해주세요.');
+                return;
+            }
+
+            // 이미지 파일 유효성 검사
+            if (!file.type.startsWith('image/')) {
+                showError('이미지 파일만 업로드할 수 있습니다.');
+                return;
+            }
+
+            // 파일 크기 제한 (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('파일 크기는 10MB 이하여야 합니다.');
+                return;
+            }
+
+            uploadImage(file);
+        });
+
+        // 이미지 업로드 함수
+        async function uploadImage(file) {
+            try {
+                showLoading();
+                hideMessages();
+                resultSection.style.display = 'none';
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch(SERVER_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                hideLoading();
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`서버 오류 (${response.status}): ${errorText}`);
+                }
+
+                // 응답이 이미지인지 확인
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.startsWith('image/')) {
+                    throw new Error('서버에서 올바른 이미지 응답을 받지 못했습니다.');
+                }
+
+                // 이미지 blob으로 변환
+                const imageBlob = await response.blob();
+                const upscaledImageUrl = URL.createObjectURL(imageBlob);
+
+                // 원본 이미지 URL 생성
+                const originalImageUrl = URL.createObjectURL(file);
+
+                // 비교 이미지들 표시
+                originalImage.src = originalImageUrl;
+                upscaledImage.src = upscaledImageUrl;
+
+                // 이미지 로드 완료 후 정보 표시
+                let loadedCount = 0;
+                const onImageLoad = () => {
+                    loadedCount++;
+                    if (loadedCount === 2) {
+                        // 두 이미지 모두 로드 완료
+                        displayImageInfo(file, imageBlob);
+                        resultSection.style.display = 'block';
+                        showSuccess('이미지 업스케일이 완료되었습니다!');
+                    }
+                };
+
+                originalImage.onload = onImageLoad;
+                upscaledImage.onload = onImageLoad;
+
+                // 에러 처리
+                originalImage.onerror = upscaledImage.onerror = function() {
+                    URL.revokeObjectURL(originalImageUrl);
+                    URL.revokeObjectURL(upscaledImageUrl);
+                    showError('이미지를 표시할 수 없습니다.');
+                };
+
+            } catch (error) {
+                hideLoading();
+                console.error('업로드 오류:', error);
+                showError(`업로드 실패: ${error.message}`);
+            }
+        }
+
+        // 이미지 정보 표시 함수
+        function displayImageInfo(originalFile, upscaledBlob) {
+            // 원본 이미지 정보
+            const originalImg = new Image();
+            originalImg.onload = function() {
+                originalInfo.innerHTML = `
+                    <strong>크기:</strong> ${originalImg.width} × ${originalImg.height}px<br>
+                    <strong>파일 크기:</strong> ${(originalFile.size / 1024).toFixed(1)}KB
+                `;
+            };
+            originalImg.src = originalImage.src;
+
+            // 업스케일된 이미지 정보
+            const upscaledImg = new Image();
+            upscaledImg.onload = function() {
+                const scaleFactor = (upscaledImg.width / originalImg.width).toFixed(1);
+                upscaledInfo.innerHTML = `
+                    <strong>크기:</strong> ${upscaledImg.width} × ${upscaledImg.height}px<br>
+                    <strong>파일 크기:</strong> ${(upscaledBlob.size / 1024).toFixed(1)}KB<br>
+                    <strong>확대율:</strong> ${scaleFactor}×
+                `;
+            };
+            upscaledImg.src = upscaledImage.src;
+        }
+
+        // UI 헬퍼 함수들
+        function showLoading() {
+            loading.style.display = 'block';
+            uploadBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            uploadBtn.disabled = false;
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function hideMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+
+        // 드래그 앤 드롭 기능
+        const uploadSection = document.querySelector('.upload-section');
+
+        uploadSection.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadSection.style.borderColor = '#764ba2';
+            uploadSection.style.background = '#f0f2ff';
+        });
+
+        uploadSection.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadSection.style.borderColor = '#667eea';
+            uploadSection.style.background = '#f8f9ff';
+        });
+
+        uploadSection.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadSection.style.borderColor = '#667eea';
+            uploadSection.style.background = '#f8f9ff';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                imageFile.files = files;
+                const event = new Event('change');
+                imageFile.dispatchEvent(event);
+            }
+        });
+    </script>
 </body>
 </html>
