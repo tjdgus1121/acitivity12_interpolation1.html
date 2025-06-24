@@ -1,5 +1,7 @@
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
+app = Flask(__name__)
+CORS(app)
 import cv2
 import numpy as np
 from PIL import Image
@@ -10,9 +12,6 @@ import torch
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://tjdgus1121.github.io"}})
-
 # 업로드 설정
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'webp'}
@@ -22,7 +21,7 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # 모델 설정
-MODEL_PATH = os.path.join('weights', 'realesr-general.pth')
+MODEL_PATH = os.path.join('weights', 'realesr-general-x4v3.pth')
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # RRDBNet 기반 ESRGAN 모델 로드
 rrdb_net = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64,
@@ -94,4 +93,9 @@ def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=True)
+    app.run(
+        host='0.0.0.0',
+        port=int(os.getenv('PORT', 5000)),
+        debug=False,        # ← 디버그 모드 off
+        use_reloader=False  # ← 자동 재시작 기능 off
+    )
