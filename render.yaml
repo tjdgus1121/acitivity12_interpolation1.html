@@ -2,15 +2,14 @@ services:
   - type: web
     name: ai-image-upscaler
     env: python
+    pythonVersion: 3.10.12       
     buildCommand: "pip install -r requirements.txt && python download_models.py"
-    startCommand: "gunicorn app:app"
+    startCommand: "python app.py"
     plan: free
     envVars:
       - key: PORT
         value: 10000
-    disk:
-      name: ai-upscaler-disk
-      mountPath: /opt/render/project/src/weights
-      sizeGB: 1
-    build:
-      pythonVersion: 3.10
+    disks:
+      - name: ai-upscaler-disk
+        mountPath: /opt/render/project/src/weights
+        sizeGB: 1
