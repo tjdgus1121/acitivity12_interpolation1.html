@@ -49,7 +49,7 @@ model.to(DEVICE).eval()
 # 4) RealESRGANer 인스턴스 생성 (model_path=None으로 아키텍처 재생성 방지)
 upscaler = RealESRGANer(
     scale=4,
-    model_path=None,
+    model_path="",
     model=model,
     tile=0,
     tile_pad=10,
