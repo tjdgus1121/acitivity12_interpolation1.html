@@ -25,10 +25,11 @@ MODEL_PATH = os.path.join('weights', 'realesr-general-x4v3.pth')
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ------------------- 수정된 부분 -------------------
-upscaler_esrgan = RealESRGANer(
+model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+upscaler = RealESRGANer(
     scale=4,
     model_path=MODEL_PATH,
-    model=None,      # None으로 두면 내부에서 .pth에 맞춘 아키텍처를 생성
+    model=model,
     tile=0,
     tile_pad=10,
     pre_pad=0,
@@ -64,7 +65,7 @@ def upscale_image():
     if quality_mode == 'esrgan':
         # BGR -> RGB
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-        output, _ = upscaler_esrgan.enhance(img_rgb, outscale=scale_factor)
+        output, _ = upscaler.enhance(img_rgb, outscale=scale_factor)
         # RGB -> BGR
         upscaled = cv2.cvtColor(np.array(output), cv2.COLOR_RGB2BGR)
     else:
